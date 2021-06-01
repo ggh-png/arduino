@@ -1,5 +1,5 @@
 
-const int dirPinA = 4;
+const int dirPinA = A4;
 const int pwmPinA = 5;
 
 void setup() {

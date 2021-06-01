@@ -3,15 +3,16 @@
 #define encoderPinA  A1
 
 // motor control pin
-#define motorDirPin  A4 //
+#define motorDirPin_A  A4 //
+#define motorDirPin_B  A5 //
 #define motorPWMPin  5 //
 
-#define rotation 4320
-
+#define rotation 1152
+// 12 * 48 * 2
 // PID control
-#define Kp 2.// P-gain 비례 3이 적당 
-#define Ki 0.05// i-gain 비례 3이 적당 
-#define Kd 2// d-gain 비례 3이 적당 
+#define Kp 0.6// P-gain 
+#define Ki 0.05// i-gain  
+#define Kd 0.01// d-gain 
 
 int encoderPos = 0; //초기 
 long ipwm_u = 0;
@@ -34,40 +35,18 @@ void doMotor(bool dir, int vel);
 void vel_PID(int m1_ref_spd);
 
 
-void setup() {
-  pinMode(encoderPinA, INPUT_PULLUP);
-  attachInterrupt(0, doEncoderA, CHANGE);
- 
-  pinMode(encoderPinB, INPUT_PULLUP);
-  attachInterrupt(1, doEncoderB, CHANGE);
- 
-  pinMode(motorDirPin, OUTPUT); 
-  pinMode(motorPWMPin, OUTPUT);
-
-  digitalWrite(motorDirPin, LOW); //LOW --> CCW
-  analogWrite(motorPWMPin, 0);
-
-  Serial.begin(115200);
-}
-
-
-
-void loop(){
-  vel_PID(30);
-}
 
 
 
 void doEncoderA(){  encoderPos += (digitalRead(encoderPinA)==digitalRead(encoderPinB))?1:-1;}
-void doEncoderB(){  encoderPos += (digitalRead(encoderPinA)==digitalRead(encoderPinB))?-1:1;}
-
-
 
 void doMotor(bool dir, long vel){
-  digitalWrite(motorDirPin, dir);
+  
+  digitalWrite(motorDirPin_A, dir);
+  digitalWrite(motorDirPin_B, !dir);
   vel = abs(vel);
   ipwm_u = vel > 255 ? 255 : vel; 
-  analogWrite(motorPWMPin, dir?ipwm_u:ipwm_u);
+  analogWrite(motorPWMPin, ipwm_u);
 }
 
 
@@ -93,6 +72,8 @@ int err_I=0;
 int err_D=0;
 int err_B=0;
 long PID_val = 0;
+
+
 void vel_PID(int m1_ref_spd){
 
     RPM(m1_ref_spd);
